@@ -10,6 +10,10 @@ cyw43 = { version = "0.7.0", features = ["defmt"] }
 cyw43-pio = { version = "0.10.0", features = ["defmt"] }
 defmt = "1.0.1"
 defmt-rtt = "1.1.0"
+edge-ws = { version = "0.8", default-features = false, features = [
+  "defmt",
+  "io",
+] }
 embassy-executor = { version = "0.10.0", features = [
   "platform-cortex-m",
   "executor-thread",
@@ -22,6 +26,7 @@ embassy-net = { version = "0.9.1", features = [
   "tcp",
   "udp",
   "dhcpv4",
+  "dns",
 ] }
 embassy-rp = { version = "0.10.0", features = [
   "time-driver",
@@ -31,7 +36,13 @@ embassy-rp = { version = "0.10.0", features = [
   "defmt",
 ] }
 embassy-time = { version = "0.5.1" }
+embedded-io-async = "0.7"
+embedded-tls = { version = "0.19", default-features = false, features = [
+  "defmt",
+] }
 panic-probe = { version = "1.0.0", features = ["print-defmt"] }
+serde = { version = "1", default-features = false, features = ["derive"] }
+serde-json-core = { version = "0.7", features = ["defmt"] }
 static_cell = "2.1.1"
 
 [build-dependencies]

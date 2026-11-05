@@ -6,7 +6,7 @@ use cyw43::{JoinOptions, aligned_bytes};
 use cyw43_pio::{DEFAULT_CLOCK_DIVIDER, PioSpi};
 use defmt::{info, warn};
 use embassy_executor::Spawner;
-use embassy_net::{Config, StackResources, tcp::TcpSocket};
+use embassy_net::{Config, StackResources};
 use embassy_rp::{
     self, bind_interrupts,
     block::ImageDef,
@@ -16,12 +16,11 @@ use embassy_rp::{
     peripherals::{DMA_CH0, PIO0},
     pio::{InterruptHandler, Pio},
 };
-use embassy_time::{Duration, Timer};
 use static_cell::StaticCell;
 use {defmt_rtt as _, panic_probe as _};
 
-const APP_ID: &str = env!("APP_ID");
-const APP_SECRET: &str = env!("APP_SECRET");
+mod api;
+
 const NETWORK_SSID: &str = env!("NETWORK_SSID");
 const NETWORK_PASSWORD: &str = env!("NETWORK_PASSWORD");
 
@@ -99,40 +98,42 @@ async fn main(spawner: Spawner) {
 
     info!("network connection up");
 
-    let mut rx_buffer = [0; 4096];
-    let mut tx_buffer = [0; 4096];
-    let mut buffer = [0; 4096];
+    api::run(stack).await
 
-    loop {
-        let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
-        socket.set_timeout(Some(Duration::from_secs(10)));
+    // let mut rx_buffer = [0; 4096];
+    // let mut tx_buffer = [0; 4096];
+    // let mut buffer = [0; 4096];
 
-        control.gpio_set(0, false).await;
-        info!("listening on TCP:1234...");
-        if let Err(e) = socket.accept(1234).await {
-            warn!("accept error: {:?}", e);
-            continue;
-        }
+    // loop {
+    //     let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
+    //     socket.set_timeout(Some(Duration::from_secs(10)));
 
-        info!("received connection from {:?}", socket.remote_endpoint());
-        control.gpio_set(0, true).await;
+    //     control.gpio_set(0, false).await;
+    //     info!("listening on TCP:1234...");
+    //     if let Err(e) = socket.accept(1234).await {
+    //         warn!("accept error: {:?}", e);
+    //         continue;
+    //     }
 
-        loop {
-            let n = match socket.read(&mut buffer).await {
-                Ok(0) => {
-                    warn!("read EOF");
-                    break;
-                }
-                Ok(n) => n,
-                Err(err) => {
-                    warn!("read error: {:?}", err);
-                    break;
-                }
-            };
+    //     info!("received connection from {:?}", socket.remote_endpoint());
+    //     control.gpio_set(0, true).await;
 
-            info!("rx {}", from_utf8(&buffer[..n]).unwrap());
-        }
-    }
+    //     loop {
+    //         let n = match socket.read(&mut buffer).await {
+    //             Ok(0) => {
+    //                 warn!("read EOF");
+    //                 break;
+    //             }
+    //             Ok(n) => n,
+    //             Err(err) => {
+    //                 warn!("read error: {:?}", err);
+    //                 break;
+    //             }
+    //         };
+
+    //         info!("rx {}", from_utf8(&buffer[..n]).unwrap());
+    //     }
+    // }
 }
 
 #[embassy_executor::task]
