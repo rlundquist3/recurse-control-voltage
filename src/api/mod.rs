@@ -18,9 +18,9 @@ use crate::api::error::Error;
 
 mod error;
 
-const HOST: &str = "recurse.rctogether.com";
+const HOST: &str = env!("HOST");
 const PORT: u16 = 443;
-const ORIGIN: &str = "https://example.rctogether.com";
+const ORIGIN: &str = env!("ORIGIN");
 const APP_ID: &str = env!("APP_ID");
 const APP_SECRET: &str = env!("APP_SECRET");
 
