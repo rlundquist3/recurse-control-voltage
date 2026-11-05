@@ -1,5 +1,6 @@
 //! Set up linker scripts for the rp235x-hal examples
 
+use dotenvy;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
@@ -22,6 +23,14 @@ fn main() {
     let mut f = File::create(out.join("rp235x_riscv.x")).unwrap();
     f.write_all(rp235x_riscv_x).unwrap();
     println!("cargo:rerun-if-changed=rp235x_riscv.x");
+
+    println!("cargo:rerun-if-changed=.env");
+    if let Ok(iter) = dotenvy::from_filename_iter(".env") {
+        for item in iter {
+            let (key, value) = item.unwrap();
+            println!("cargo:rustc-env={key}={value}");
+        }
+    }
 
     println!("cargo:rerun-if-changed=build.rs");
 }
